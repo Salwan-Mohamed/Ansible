@@ -2,7 +2,8 @@
 - name: Test IOS Facts
   hosts: switches
   tasks:
-    - name: Gather all legacy facts
-      cisco.ios.ios_facts:
-      gather_subset: all
+    - name: Run show version on remote devices
+      cisco.ios.ios_command:
+       commands: show version
+
 
