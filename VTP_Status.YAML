@@ -1,0 +1,23 @@
+---
+- name: Check Cisco Hostname and VTP Status
+  hosts: switches
+  gather_facts: no
+  tasks:
+
+    - name: Gather device hostname
+      cisco.ios.ios_command:
+        commands: "show running-config | include hostname"
+      register: hostname_output
+
+    - name: Display hostname
+      debug:
+        msg: "{{ hostname_output.stdout_lines }}"
+
+    - name: Gather VTP status
+      cisco.ios.ios_command:
+        commands: "show vtp status"
+      register: vtp_output
+
+    - name: Display VTP status
+      debug:
+        msg: "{{ vtp_output.stdout_lines }}"
