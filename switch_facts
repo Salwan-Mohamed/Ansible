@@ -1,0 +1,11 @@
+---
+- name: Test IOS Facts
+  hosts: switches
+  tasks:
+    - debug:
+        var: ansible_facts
+
+    - name: Gather IOS Facts 02
+      ios_facts:
+        gather_subset: all
+      register: all_subset
