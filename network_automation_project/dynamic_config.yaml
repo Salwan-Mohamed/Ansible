@@ -1,0 +1,79 @@
+---
+- name: Resolve Switch Based on Room Number
+  hosts: localhost
+  gather_facts: no
+  vars_files:
+    - switch_mapping.yml
+
+  tasks:
+    - name: Debugging - Show Provided Room
+      debug:
+        msg: "Room: {{ room }}"
+
+    - name: Find Switch for Given Room
+      set_fact:
+        switch_name: "{{ item.key }}"
+      loop: "{{ switch_mapping | dict2items }}"
+      when: room in item.value
+
+    - name: Debugging - Show Resolved Switch Hostname
+      debug:
+        msg: "Resolved Switch: {{ switch_name }}"
+
+    - name: Fail if No Matching Switch is Found
+      fail:
+        msg: "No switch found for room {{ room }}. Check switch_mapping.yml"
+      when: switch_name is not defined
+
+    - name: Add Resolved Switch to Inventory
+      add_host:
+        name: "{{ switch_name }}"
+        groups: dynamic_switches
+
+- name: Configure Cisco Switch Port Based on Device Type and VLAN Mapping
+  hosts: dynamic_switches
+  gather_facts: no
+  vars_files:
+    - vlan_mapping.yml
+
+  tasks:
+    - name: Debugging - Show Provided Inputs
+      debug:
+        msg: "Port: {{ port_number }}, Device Type: {{ device_type }}"
+
+    - name: Retrieve VLAN ID from mapping file
+      set_fact:
+        vlan_id: "{{ vlan_mapping[device_type] | default('0') }}"
+
+    - name: Debugging - Show VLAN ID Retrieved
+      debug:
+        msg: "VLAN ID for {{ device_type }}: {{ vlan_id }}"
+
+    - name: Validate VLAN ID Before Applying Configuration
+      fail:
+        msg: "Error: VLAN ID could not be determined for {{ device_type }}. Check VLAN configuration."
+      when: vlan_id == "0"
+
+    - name: Reset the interface to default configuration
+      cisco.ios.ios_config:
+        lines:
+          - "default interface GigabitEthernet{{ port_number }}"
+
+    - name: Configure interface with VLAN settings
+      cisco.ios.ios_config:
+        lines:
+          - "description {{ device_type }}"
+          - "switchport mode access"
+          - "switchport access vlan {{ vlan_id }}"
+          - "no shutdown"
+        parents: "interface GigabitEthernet{{ port_number }}"
+
+    - name: Debugging - Show Applied Configuration
+      debug:
+        msg:
+          - "Applied Config:"
+          - "interface GigabitEthernet{{ port_number }}"
+          - "description {{ device_type }}"
+          - "switchport mode access"
+          - "switchport access vlan {{ vlan_id }}"
+          - "no shutdown"
