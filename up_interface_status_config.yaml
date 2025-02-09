@@ -1,0 +1,24 @@
+---
+- name: Retrieve TenGigabitEthernet1/0/1 Configuration and Status
+  hosts: your_cisco_devices_group
+  gather_facts: no
+  tasks:
+    - name: Run 'show running-config interface TenGigabitEthernet1/0/1'
+      cisco.ios.ios_command:
+        commands:
+          - show running-config interface TenGigabitEthernet1/0/1
+      register: interface_config
+
+    - name: Run 'show interfaces TenGigabitEthernet1/0/1 status'
+      cisco.ios.ios_command:
+        commands:
+          - show interfaces TenGigabitEthernet1/0/1 status
+      register: interface_status
+
+    - name: Display Interface Configuration
+      debug:
+        msg: "{{ interface_config.stdout[0] }}"
+
+    - name: Display Interface Status
+      debug:
+        msg: "{{ interface_status.stdout[0] }}"
