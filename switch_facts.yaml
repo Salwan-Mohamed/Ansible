@@ -1,6 +1,6 @@
 ---
 - name: Retrieve and Display 'show version' Output
-  hosts: switch_stack_B_A
+  hosts: switch_stack_B_A,switche_dist_B_A
   gather_facts: no
   connection: network_cli
 
