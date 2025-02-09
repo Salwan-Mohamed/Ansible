@@ -22,16 +22,16 @@
 
     - name: Debugging - Show Raw VLAN Output
       debug:
-        msg: "{{ vlan_output.stdout }}"
+        msg: "{{ vlan_output.stdout | default('No output') }}"
 
-    - name: Parse VLAN ID from switch output
+    - name: Check if VLAN output is empty
       set_fact:
-        vlan_id: "{{ vlan_output.stdout[0].split()[0] if vlan_output.stdout[0] is defined else '0' }}"
+        vlan_id: "{{ vlan_output.stdout[0].split()[0] if vlan_output.stdout and vlan_output.stdout[0] | length > 0 else '0' }}"
 
     - name: Validate VLAN ID Before Applying Configuration
       fail:
         msg: "Error: VLAN ID could not be determined. Check VLAN configuration on the switch."
-      when: vlan_id in ['None', '0']
+      when: vlan_id in ['0']
 
     - name: Retrieve VLAN ID for phone
       cisco.ios.ios_command:
@@ -41,7 +41,7 @@
 
     - name: Parse Phone VLAN ID from switch output
       set_fact:
-        phone_vlan_id: "{{ phone_vlan_output.stdout[0].split()[0] if phone_vlan_output.stdout[0] is defined else '0' }}"
+        phone_vlan_id: "{{ phone_vlan_output.stdout[0].split()[0] if phone_vlan_output.stdout and phone_vlan_output.stdout[0] | length > 0 else '0' }}"
       when: device_type in ['phone', 'device and phone']
 
     - name: Debugging - Show VLAN IDs
