@@ -15,9 +15,9 @@
       set_fact:
         port_description: "{{ port_descriptions[port_number] | default('No description set') }}"
 
-    - name: Retrieve VLAN ID for the device type
+    - name: Retrieve VLAN ID for the port number
       cisco.ios.ios_command:
-        commands: "show vlan brief | include {{ device_type }}"
+        commands: "show vlan brief | include Gi{{ port_number }}"
       register: vlan_output
 
     - name: Debugging - Show Raw VLAN Output
@@ -30,10 +30,10 @@
 
     - name: Validate VLAN ID Before Applying Configuration
       fail:
-        msg: "Error: VLAN ID could not be determined. Check VLAN configuration on the switch."
+        msg: "Error: VLAN ID could not be determined for port {{ port_number }}. Check VLAN assignment on the switch."
       when: vlan_id in ['0']
 
-    - name: Retrieve VLAN ID for phone
+    - name: Retrieve VLAN ID for phones
       cisco.ios.ios_command:
         commands: "show vlan brief | include phone"
       register: phone_vlan_output
