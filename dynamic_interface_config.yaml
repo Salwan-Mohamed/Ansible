@@ -65,6 +65,16 @@
         config_lines: >-
           {{
             {
+              'zero_client': [
+                'description {{ port_description }}',
+                'switchport mode access',
+                'switchport access vlan {{ vlan_id }}',
+                'duplex full',
+                'switchport port-security mac-address sticky',
+                'switchport port-security maximum 1',
+                'switchport port-security',
+                'no shutdown'
+              ],
               'device': [
                 'description {{ port_description }}',
                 'switchport mode access',
