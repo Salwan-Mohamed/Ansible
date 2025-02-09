@@ -15,7 +15,3 @@
       debug:
         var: show_version_output.stdout
 
-    - name: Save 'show version' output to file
-      copy:
-      content: "{{ show_version_output.stdout[0] }}"
-      dest: "/home/devops/{{ inventory_hostname }}_show_version.txt"
