@@ -1,6 +1,6 @@
 ---
 - name: Test IOS Facts
-  hosts: switches
+  hosts: switch_stack_B_A
   tasks:
     - name: Run show version on remote devices
       cisco.ios.ios_command:
