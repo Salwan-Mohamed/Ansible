@@ -1,0 +1,32 @@
+---
+- name: Configure Cisco Switch Port Based on Device Type
+  hosts: "{{ switch_name }}"
+  gather_facts: no
+  tasks:
+    - name: Set interface configuration based on device type
+      cisco.ios.ios_config:
+        lines: "{{ config_lines }}"
+        parents: "interface {{ port_number }}"
+      vars:
+        config_lines: >-
+          {%- if device_type == 'zero client' -%}
+          - switchport mode access
+          - switchport access vlan 541
+          - dufu
+          - no shutdown
+          {%- elif device_type == 'zero client and phone' -%}
+          - switchport mode access
+          - switchport access vlan 541
+          - switchport voice vlan 528
+          - dufu
+          - no shutdown
+          {%- elif device_type == 'phone' -%}
+          - switchport mode access
+          - switchport voice vlan 528
+          - dufu
+          - no shutdown
+          {%- elif device_type == 'shutdown' -%}
+          - shutdown
+          {%- else -%}
+          - ! ERROR: Invalid device type specified.
+          {%- endif -%}
