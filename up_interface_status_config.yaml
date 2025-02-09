@@ -1,6 +1,6 @@
 ---
 - name: Retrieve TenGigabitEthernet1/0/1 Configuration and Status
-  hosts: your_cisco_devices_group
+  hosts: switch_stack_B_A
   gather_facts: no
   tasks:
     - name: Run 'show running-config interface TenGigabitEthernet1/0/1'
