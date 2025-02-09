@@ -24,9 +24,14 @@
       debug:
         msg: "{{ vlan_output.stdout | default('No output') }}"
 
-    - name: Check if VLAN output is empty
+    - name: Extract VLAN ID from the output
       set_fact:
-        vlan_id: "{{ vlan_output.stdout[0].split()[0] if vlan_output.stdout and vlan_output.stdout[0] | length > 0 else '0' }}"
+        vlan_id: >-
+          {{
+            vlan_output.stdout[0].split()[0]
+            if vlan_output.stdout and vlan_output.stdout[0] | regex_search('Gi' ~ port_number)
+            else '0'
+          }}
 
     - name: Validate VLAN ID Before Applying Configuration
       fail:
