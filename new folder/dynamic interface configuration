@@ -1,1 +1,49 @@
+---
+- name: Configure Cisco Switch Port Based on Device Type and VLAN Mapping
+  hosts: "{{ switch_name }}"
+  gather_facts: no
+  vars_files:
+    - vlan_mapping.yml  # Load VLANs from mapping file
 
+  tasks:
+
+    - name: Debugging - Show Provided Inputs
+      debug:
+        msg: "Port: {{ port_number }}, Device Type: {{ device_type }}"
+
+    - name: Retrieve VLAN ID from mapping file
+      set_fact:
+        vlan_id: "{{ vlan_mapping[device_type] | default('0') }}"
+
+    - name: Debugging - Show VLAN ID Retrieved
+      debug:
+        msg: "VLAN ID for {{ device_type }}: {{ vlan_id }}"
+
+    - name: Validate VLAN ID Before Applying Configuration
+      fail:
+        msg: "Error: VLAN ID could not be determined for {{ device_type }}. Check VLAN configuration."
+      when: vlan_id == "0"
+
+    - name: Reset the interface to default configuration
+      cisco.ios.ios_config:
+        lines:
+          - "default interface GigabitEthernet{{ port_number }}"
+
+    - name: Configure interface with VLAN settings
+      cisco.ios.ios_config:
+        lines:
+          - "description {{ device_type }}"  # FIXED THIS LINE
+          - "switchport mode access"
+          - "switchport access vlan {{ vlan_id }}"
+          - "no shutdown"
+        parents: "interface GigabitEthernet{{ port_number }}"  # THIS ENSURES THE COMMANDS ARE APPLIED CORRECTLY
+
+    - name: Debugging - Show Applied Configuration
+      debug:
+        msg:
+          - "Applied Config:"
+          - "interface GigabitEthernet{{ port_number }}"
+          - "description {{ device_type }}"
+          - "switchport mode access"
+          - "switchport access vlan {{ vlan_id }}"
+          - "no shutdown"
