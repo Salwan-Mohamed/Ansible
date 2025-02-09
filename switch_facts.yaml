@@ -1,6 +1,6 @@
 ---
 - name: Retrieve and Display 'show version' Output
-  hosts: 
+  hosts: switch_stack_B_A
   gather_facts: no
   connection: network_cli
 
@@ -18,4 +18,4 @@
     - name: Save 'show version' output to file
       copy:
       content: "{{ show_version_output.stdout[0] }}"
-      dest: "/path/to/save/{{ inventory_hostname }}_show_version.txt"
+      dest: "/home/devops/{{ inventory_hostname }}_show_version.txt"
