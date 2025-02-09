@@ -1,9 +1,21 @@
 ---
-- name: Test IOS Facts
-  hosts: switch_stack_B_A
+- name: Retrieve and Display 'show version' Output
+  hosts: 
+  gather_facts: no
+  connection: network_cli
+
   tasks:
-    - name: Run show version on remote devices
+    - name: Run 'show version' command
       cisco.ios.ios_command:
-       commands: show version
+        commands:
+          - show version
+      register: show_version_output
 
+    - name: Display 'show version' output
+      debug:
+        var: show_version_output.stdout
 
+    - name: Save 'show version' output to file
+      copy:
+      content: "{{ show_version_output.stdout[0] }}"
+      dest: "/path/to/save/{{ inventory_hostname }}_show_version.txt"
