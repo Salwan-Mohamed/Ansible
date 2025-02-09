@@ -2,7 +2,18 @@
 - name: Configure Cisco Switch Port Based on Device Type and VLAN Lookup
   hosts: "{{ switch_name }}"
   gather_facts: no
+  vars_files:
+    - port_descriptions.yml  # Load port descriptions from file
+
   tasks:
+
+    - name: Debugging - Show Retrieved Port Description
+      debug:
+        msg: "Port {{ port_number }} Description: {{ port_descriptions[port_number] | default('No description set') }}"
+
+    - name: Set port description variable
+      set_fact:
+        port_description: "{{ port_descriptions[port_number] | default('No description set') }}"
 
     - name: Retrieve VLAN ID for the device type
       cisco.ios.ios_command:
@@ -15,7 +26,7 @@
 
     - name: Retrieve VLAN ID for phone
       cisco.ios.ios_command:
-        commands: "show vlan brief | include voice"
+        commands: "show vlan brief | include phone"
       register: phone_vlan_output
       when: device_type in ['phone', 'device and phone']
 
@@ -24,9 +35,11 @@
         phone_vlan_id: "{{ phone_vlan_output.stdout[0].split()[0] | default('None') }}"
       when: device_type in ['phone', 'device and phone']
 
-    - name: Get description for port from file
-      set_fact:
-        port_description: "{{ port_descriptions[port_number] | default('No description set') }}"
+    - name: Debugging - Show VLAN IDs
+      debug:
+        msg:
+          - "Device VLAN ID: {{ vlan_id }}"
+          - "Phone VLAN ID: {{ phone_vlan_id | default('Not applicable') }}"
 
     - name: Reset the interface to default configuration
       cisco.ios.ios_config:
@@ -76,7 +89,7 @@
             }[device_type]
           }}
 
-    - name: Configure interface VLAN, description, and security
+    - name: Configure interface with VLAN, description, and security settings
       cisco.ios.ios_config:
         lines: "{{ config_lines }}"
         parents: "interface GigabitEthernet{{ port_number }}"
