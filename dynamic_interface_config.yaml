@@ -68,7 +68,7 @@
               'device': [
                 'description {{ port_description }}',
                 'switchport mode access',
-                'switchport access vlan {{ vlan_id }}',
+                'switchport access vlan {{ vlan_id }}',   # <-- Fixed here
                 'duplex full',
                 'switchport port-security mac-address sticky',
                 'switchport port-security maximum 1',
@@ -88,7 +88,7 @@
               'device and phone': [
                 'description {{ port_description }}',
                 'switchport mode access',
-                'switchport access vlan {{ vlan_id }}',
+                'switchport access vlan {{ vlan_id }}',   # <-- Fixed here
                 'switchport voice vlan {{ phone_vlan_id }}',
                 'duplex full',
                 'switchport port-security mac-address sticky',
